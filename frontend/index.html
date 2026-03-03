@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assam Result Portal 2024</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
+      <h1 class="text-2xl font-bold text-center text-blue-800 mb-6">Assam SEBA/AHSEC Result</h1>
+      <div class="space-y-4">
+        <input type="text" id="roll" class="w-full border p-2 rounded" placeholder="Roll (0001)" />
+        <input type="text" id="no" class="w-full border p-2 rounded" placeholder="Number (10041)" />
+        <button onclick="fetchResult()" id="searchBtn" class="w-full bg-blue-600 text-white font-bold py-2 rounded">Check Result</button>
+      </div>
+      <div id="resultArea" class="mt-8 hidden border-t pt-4">
+        <h2 class="text-xl font-bold" id="studentName"></h2>
+        <div id="marksTable" class="mt-4"></div>
+        <button onclick="downloadPDF()" class="mt-4 w-full bg-green-600 text-white py-2 rounded">Download PDF</button>
+      </div>
+      <div id="loader" class="hidden text-center mt-4 animate-pulse">Searching...</div>
+      <div id="error" class="hidden text-red-500 text-center mt-4">Result not found.</div>
+    </div>
+
+    <script>
+      let currentResult = null;
+      async function fetchResult() {
+        const roll = document.getElementById("roll").value.trim();
+        const no = document.getElementById("no").value.trim();
+        if (!roll || !no) return alert("Enter Roll and No");
+
+        document.getElementById("resultArea").classList.add("hidden");
+        document.getElementById("error").classList.add("hidden");
+        document.getElementById("loader").classList.remove("hidden");
+
+        try {
+          // Hardcoded URL to prevent construction errors
+          const url = "https://hlrcfmiwizggb6mq7jcsezvi5u0wgdpb.lambda-url.ap-south-1.on.aws/?rollNumber=" + roll + "-" + no;
+          console.log("Fetching:", url);
+          
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Not found");
+
+          currentResult = await response.json();
+          document.getElementById("studentName").innerText = currentResult.CandidateName;
+          
+          let html = '<table class="w-full text-sm border"><tr><th class="border p-1">Subject</th><th class="border p-1">Marks</th></tr>';
+          for (let i = 1; i <= 16; i++) {
+            if (currentResult["Sub" + i + "_Name"]) {
+              html += '<tr><td class="border p-1">' + currentResult["Sub" + i + "_Name"] + '</td><td class="border p-1">' + currentResult["Sub" + i + "_Tot_Marks"] + '</td></tr>';
+            }
+          }
+          document.getElementById("marksTable").innerHTML = html + '</table>';
+          document.getElementById("resultArea").classList.remove("hidden");
+        } catch (err) {
+          console.error(err);
+          document.getElementById("error").classList.remove("hidden");
+        } finally {
+          document.getElementById("loader").classList.add("hidden");
+        }
+      }
+
+      function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Result: " + currentResult.CandidateName, 20, 20);
+        doc.save("Result.pdf");
+      }
+    </script>
+  </body>
+</html>

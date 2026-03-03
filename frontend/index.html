@@ -3,72 +3,733 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Assam Result Portal 2024</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <title>AHSEC Marks Sheet</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #b0b0b0;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        font-family: "Times New Roman", Times, serif;
+      }
+
+      .page {
+        width: 740px;
+        background: #fff;
+        padding: 14px 18px 10px 18px;
+        border: 1px solid #888;
+      }
+
+      /* ── TOP FORM NUMBER ── */
+      .form-num {
+        text-align: right;
+        font-size: 10.5px;
+        margin-bottom: 2px;
+      }
+
+      /* ── HEADER ── */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 3px;
+      }
+      .htext {
+        text-align: center;
+      }
+      .htext .h1 {
+        font-size: 19px;
+        font-weight: bold;
+        letter-spacing: 0.2px;
+        line-height: 1.25;
+      }
+      .htext .h2 {
+        font-size: 12.5px;
+        font-weight: bold;
+      }
+      .htext .h3 {
+        font-size: 12.5px;
+        font-weight: bold;
+      }
+      .htext .h4 {
+        font-size: 13.5px;
+        font-weight: bold;
+        margin-top: 1px;
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid #000;
+        margin: 6px 0 5px;
+      }
+
+      /* ── INFO BLOCK ── */
+      .info {
+        font-size: 12px;
+        line-height: 1.7;
+      }
+      .info .row-top {
+        display: flex;
+        justify-content: space-between;
+      }
+      .info .roll-row {
+        display: flex;
+        gap: 40px;
+        margin-top: 2px;
+      }
+
+      /* ── MAIN TABLE ── */
+      .main-wrap {
+        border: 1px solid #000;
+        margin-top: 8px;
+        /* stretch to fill remaining space before bottom section */
+      }
+
+      table.main {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        font-family: "Times New Roman", Times, serif;
+        table-layout: fixed;
+      }
+
+      table.main th,
+      table.main td {
+        border: 1px solid #000;
+        vertical-align: middle;
+      }
+
+      /* Column widths — total = 740px minus 2px outer border = 738px */
+      /* CODE=62  TYPE=48  SUBJ=220  THEORY=70  PR=44  TOTAL=62  RESULT=232 */
+      .c-code {
+        width: 62px;
+        text-align: center;
+      }
+      .c-type {
+        width: 48px;
+        text-align: center;
+      }
+      .c-subj {
+        width: 220px;
+      }
+      .c-theory {
+        width: 70px;
+        text-align: center;
+      }
+      .c-pr {
+        width: 44px;
+        text-align: center;
+      }
+      .c-total {
+        width: 62px;
+        text-align: center;
+      }
+      .c-result {
+        width: 232px;
+      }
+
+      /* Header row — tall, all text centered */
+      .hdr-row th {
+        padding: 8px 6px;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+      }
+      /* The SUBJECTS header spans code+type+subj columns */
+      .hdr-subjects {
+        vertical-align: middle;
+      }
+
+      /* Result header cell — vertically centered division info */
+      .result-div {
+        padding: 6px 8px;
+        font-size: 11px;
+        text-align: center;
+        line-height: 1.5;
+        vertical-align: middle;
+      }
+      .result-div .dname {
+        font-style: italic;
+        font-weight: bold;
+        font-size: 11.5px;
+      }
+      .result-div .drange {
+        font-size: 11px;
+      }
+      .result-div .dfn {
+        font-size: 8.8px;
+        line-height: 1.4;
+        margin-top: 4px;
+        text-align: left;
+      }
+
+      /* Subject data rows */
+      .srow td {
+        padding: 5px 6px;
+        font-size: 12px;
+      }
+      .srow td.c-code,
+      .srow td.c-type,
+      .srow td.c-theory,
+      .srow td.c-pr,
+      .srow td.c-total {
+        text-align: center;
+      }
+
+      /* Empty filler rows — these grow to fill vertical space */
+      .frow td {
+        height: 36px;
+        padding: 0;
+      }
+
+      /* Grand Total row */
+      .gt-row td {
+        font-size: 11.5px;
+        padding: 6px 6px;
+        vertical-align: middle;
+      }
+      .gt-label {
+        font-weight: bold;
+        font-size: 11.5px;
+        line-height: 1.4;
+      }
+      .gt-sub {
+        font-weight: normal;
+        font-size: 9.5px;
+      }
+      .gt-words {
+        text-align: center;
+        font-size: 12px;
+      }
+      .gt-total {
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+      }
+      .gt-result {
+        text-align: center;
+        font-weight: bold;
+        font-size: 12.5px;
+      }
+
+      /* ENVE row */
+      .enve-row td {
+        padding: 4px 6px;
+        font-size: 12px;
+      }
+      .enve-row td.grade {
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+      }
+
+      /* ── BOTTOM SECTION ── */
+      .bottom {
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
+        margin-top: 10px;
+        font-size: 10.5px;
+      }
+      .b-qr-text {
+        flex: 0 0 200px;
+        font-style: italic;
+        font-size: 10.5px;
+        line-height: 1.65;
+      }
+      .b-qr-img {
+        flex: 0 0 88px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+      }
+      .qr-border {
+        width: 80px;
+        height: 80px;
+        border: 1px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .b-watermark {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .watermark-text {
+        font-size: 38px;
+        font-weight: bold;
+        color: #c5c5c5;
+        font-style: italic;
+        font-family: "Times New Roman", serif;
+        line-height: 1.05;
+        text-align: center;
+      }
+      .b-controller {
+        flex: 0 0 175px;
+        font-size: 10.5px;
+        text-align: right;
+        line-height: 1.7;
+        align-self: flex-end;
+      }
+
+      /* ── LEGEND TABLE ── */
+      .legend-wrap {
+        border: 1px solid #000;
+        margin-top: 10px;
+      }
+      .legend-inner {
+        display: flex;
+      }
+      .legend-left {
+        border-right: 1px solid #000;
+        padding: 4px 10px 4px 10px;
+        flex: 0 0 310px;
+      }
+      .legend-right {
+        flex: 1;
+        padding: 4px 10px;
+      }
+      .ltable {
+        font-size: 11px;
+        border-collapse: collapse;
+      }
+      .ltable td {
+        padding: 1px 8px 1px 0;
+      }
+      .ltable .lhdr {
+        text-align: center;
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      /* ── DISCLAIMER ── */
+      .disclaimer {
+        border: 1px solid #000;
+        border-top: none;
+        font-size: 9.5px;
+        text-align: center;
+        padding: 3px 8px;
+        line-height: 1.4;
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
-      <h1 class="text-2xl font-bold text-center text-blue-800 mb-6">Assam SEBA/AHSEC Result</h1>
-      <div class="space-y-4">
-        <input type="text" id="roll" class="w-full border p-2 rounded" placeholder="Roll (0001)" />
-        <input type="text" id="no" class="w-full border p-2 rounded" placeholder="Number (10041)" />
-        <button onclick="fetchResult()" id="searchBtn" class="w-full bg-blue-600 text-white font-bold py-2 rounded">Check Result</button>
+  <body>
+    <div class="page">
+      <!-- Form Number -->
+      <div class="form-num">Form No. Ex-32(a)</div>
+
+      <!-- Header -->
+      <div class="header">
+        <!-- Emblem SVG -->
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="32"
+            cy="32"
+            r="30"
+            fill="none"
+            stroke="#000"
+            stroke-width="1.4"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            r="25"
+            fill="none"
+            stroke="#000"
+            stroke-width="0.7"
+          />
+          <text
+            x="32"
+            y="17"
+            text-anchor="middle"
+            font-size="4.8"
+            font-family="Times New Roman,serif"
+            font-weight="bold"
+          >
+            ASSAM HIGHER
+          </text>
+          <text
+            x="32"
+            y="24"
+            text-anchor="middle"
+            font-size="4.8"
+            font-family="Times New Roman,serif"
+            font-weight="bold"
+          >
+            SECONDARY
+          </text>
+          <text
+            x="32"
+            y="31"
+            text-anchor="middle"
+            font-size="4.8"
+            font-family="Times New Roman,serif"
+            font-weight="bold"
+          >
+            EDUCATION
+          </text>
+          <text
+            x="32"
+            y="38"
+            text-anchor="middle"
+            font-size="4.8"
+            font-family="Times New Roman,serif"
+            font-weight="bold"
+          >
+            COUNCIL
+          </text>
+          <text
+            x="32"
+            y="48"
+            text-anchor="middle"
+            font-size="5.5"
+            font-family="Times New Roman,serif"
+          >
+            AHSEC
+          </text>
+        </svg>
+        <div class="htext">
+          <div class="h1">ASSAM HIGHER SECONDARY EDUCATION COUNCIL</div>
+          <div class="h2">GUWAHATI - 781021</div>
+          <div class="h3">MARKS-SHEET (INTERNET COPY)</div>
+          <div class="h4">HIGHER SECONDARY FINAL EXAMINATION-2021</div>
+        </div>
       </div>
-      <div id="resultArea" class="mt-8 hidden border-t pt-4">
-        <h2 class="text-xl font-bold" id="studentName"></h2>
-        <div id="marksTable" class="mt-4"></div>
-        <button onclick="downloadPDF()" class="mt-4 w-full bg-green-600 text-white py-2 rounded">Download PDF</button>
+
+      <hr />
+
+      <!-- Info Block -->
+      <div class="info">
+        <div class="row-top">
+          <span>Stream : <strong>ARTS</strong></span>
+          <span>Date : <strong>30/07/2021</strong></span>
+        </div>
+        <div>Name : <strong>SABANA BEGUM LASKAR</strong></div>
+        <div>
+          College/School :
+          <strong>SILCHAR GOVT GIRLS' H S &amp; M P SCHOOL</strong>
+        </div>
+        <div class="roll-row">
+          <span>Roll : <strong>0241</strong></span>
+          <span>No. : <strong>10037</strong></span>
+        </div>
       </div>
-      <div id="loader" class="hidden text-center mt-4 animate-pulse">Searching...</div>
-      <div id="error" class="hidden text-red-500 text-center mt-4">Result not found.</div>
+
+      <!-- Main Table -->
+      <div class="main-wrap">
+        <table class="main">
+          <colgroup>
+            <col class="c-code" />
+            <col class="c-type" />
+            <col class="c-subj" />
+            <col class="c-theory" />
+            <col class="c-pr" />
+            <col class="c-total" />
+            <col class="c-result" />
+          </colgroup>
+          <thead>
+            <tr class="hdr-row" style="height: 130px">
+              <th class="c-code" style="padding: 6px 4px">CODE</th>
+              <th colspan="2" class="hdr-subjects" style="padding: 6px 4px">
+                SUBJECTS
+              </th>
+              <th class="c-theory" style="padding: 6px 4px">THEORY</th>
+              <th class="c-pr" style="padding: 6px 4px">PR</th>
+              <th class="c-total" style="padding: 6px 4px">TOTAL</th>
+              <!-- Result column spans all subject rows + header -->
+              <td
+                class="c-result result-div"
+                rowspan="11"
+                style="vertical-align: middle; border-left: 1px solid #000"
+              >
+                <div class="dname">1st Division</div>
+                <div class="drange">300 and above</div>
+                <br />
+                <div class="dname">2nd Division</div>
+                <div class="drange">225 - 299</div>
+                <br />
+                <div class="dname">3rd Division</div>
+                <div class="drange">**150/153/156/159 - 224</div>
+                <div class="dfn">
+                  **<br />
+                  150 - Without practical subjects.<br />
+                  153 - With one practical subject.<br />
+                  156 - With two practical subjects.<br />
+                  159 - With three practical subjects.
+                </div>
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Subject rows -->
+            <tr class="srow">
+              <td class="c-code">ENGL</td>
+              <td class="c-type">CORE</td>
+              <td class="c-subj">ENGLISH</td>
+              <td class="c-theory">33</td>
+              <td class="c-pr"></td>
+              <td class="c-total">33</td>
+            </tr>
+            <tr class="srow">
+              <td class="c-code">MBEN</td>
+              <td class="c-type">CORE</td>
+              <td class="c-subj">MIL (BENGALI)</td>
+              <td class="c-theory">39</td>
+              <td class="c-pr"></td>
+              <td class="c-total">39</td>
+            </tr>
+            <tr class="srow">
+              <td class="c-code">POSC</td>
+              <td class="c-type">EL-I</td>
+              <td class="c-subj">POLITICAL SCIENCE</td>
+              <td class="c-theory">40</td>
+              <td class="c-pr"></td>
+              <td class="c-total">40</td>
+            </tr>
+            <tr class="srow">
+              <td class="c-code">ECON</td>
+              <td class="c-type">EL-II</td>
+              <td class="c-subj">ECONOMICS</td>
+              <td class="c-theory">37</td>
+              <td class="c-pr"></td>
+              <td class="c-total">37</td>
+            </tr>
+            <tr class="srow">
+              <td class="c-code">ADBE</td>
+              <td class="c-type">EL-III</td>
+              <td class="c-subj">ADVANCE BENGALI</td>
+              <td class="c-theory">35</td>
+              <td class="c-pr"></td>
+              <td class="c-total">35</td>
+            </tr>
+            <!-- Filler empty rows to extend table to page bottom -->
+            <tr class="frow">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="frow">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="frow">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="frow">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="frow">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+
+          <!-- Grand Total -->
+          <tr class="gt-row">
+            <td colspan="2" style="vertical-align: top">
+              <div class="gt-label">GRAND TOTAL<br />(Out of 500 Marks)</div>
+              <div class="gt-sub">
+                (Marks of subjects<br />excluding the fourth<br />elective)
+              </div>
+            </td>
+            <td class="gt-words">ONE EIGHT FOUR</td>
+            <td></td>
+            <td></td>
+            <td class="gt-total">184</td>
+            <td class="gt-result">THIRD DIVISION</td>
+          </tr>
+
+          <!-- ENVE row -->
+          <tr class="enve-row">
+            <td colspan="5">ENVE - GRADE ON ENVIRONMENTAL EDUCATION</td>
+            <td class="grade">B</td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="bottom">
+        <div class="b-qr-text">
+          <em
+            >In order to verify the result, scan the QR Code<br />
+            and follow instructions as appearing in the screen.<br />
+            <span style="font-style: normal">or</span><br />
+            Visit website http://www.ahsec.assam.gov.in/</em
+          >
+        </div>
+
+        <div class="b-qr-img">
+          <div class="qr-border">
+            <svg
+              width="72"
+              height="72"
+              viewBox="0 0 72 72"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <!-- Top-left finder -->
+              <rect
+                x="2"
+                y="2"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#000"
+                stroke-width="2"
+              />
+              <rect x="6" y="6" width="12" height="12" fill="#000" />
+              <!-- Top-right finder -->
+              <rect
+                x="50"
+                y="2"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#000"
+                stroke-width="2"
+              />
+              <rect x="54" y="6" width="12" height="12" fill="#000" />
+              <!-- Bottom-left finder -->
+              <rect
+                x="2"
+                y="50"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#000"
+                stroke-width="2"
+              />
+              <rect x="6" y="54" width="12" height="12" fill="#000" />
+              <!-- Data dots -->
+              <rect x="26" y="2" width="4" height="4" fill="#000" />
+              <rect x="32" y="2" width="4" height="4" fill="#000" />
+              <rect x="38" y="2" width="4" height="4" fill="#000" />
+              <rect x="44" y="2" width="4" height="4" fill="#000" />
+              <rect x="26" y="8" width="4" height="4" fill="#000" />
+              <rect x="38" y="8" width="4" height="4" fill="#000" />
+              <rect x="44" y="8" width="4" height="4" fill="#000" />
+              <rect x="32" y="14" width="4" height="4" fill="#000" />
+              <rect x="26" y="20" width="4" height="4" fill="#000" />
+              <rect x="38" y="20" width="4" height="4" fill="#000" />
+              <rect x="2" y="26" width="4" height="4" fill="#000" />
+              <rect x="8" y="26" width="4" height="4" fill="#000" />
+              <rect x="20" y="26" width="4" height="4" fill="#000" />
+              <rect x="26" y="26" width="4" height="4" fill="#000" />
+              <rect x="32" y="32" width="4" height="4" fill="#000" />
+              <rect x="38" y="26" width="4" height="4" fill="#000" />
+              <rect x="44" y="32" width="4" height="4" fill="#000" />
+              <rect x="50" y="26" width="4" height="4" fill="#000" />
+              <rect x="56" y="26" width="4" height="4" fill="#000" />
+              <rect x="62" y="32" width="4" height="4" fill="#000" />
+              <rect x="68" y="26" width="4" height="4" fill="#000" />
+              <rect x="2" y="38" width="4" height="4" fill="#000" />
+              <rect x="8" y="44" width="4" height="4" fill="#000" />
+              <rect x="20" y="38" width="4" height="4" fill="#000" />
+              <rect x="26" y="44" width="4" height="4" fill="#000" />
+              <rect x="38" y="38" width="4" height="4" fill="#000" />
+              <rect x="44" y="44" width="4" height="4" fill="#000" />
+              <rect x="50" y="38" width="4" height="4" fill="#000" />
+              <rect x="62" y="38" width="4" height="4" fill="#000" />
+              <rect x="68" y="44" width="4" height="4" fill="#000" />
+              <rect x="26" y="50" width="4" height="4" fill="#000" />
+              <rect x="38" y="50" width="4" height="4" fill="#000" />
+              <rect x="44" y="56" width="4" height="4" fill="#000" />
+              <rect x="50" y="50" width="4" height="4" fill="#000" />
+              <rect x="56" y="56" width="4" height="4" fill="#000" />
+              <rect x="62" y="50" width="4" height="4" fill="#000" />
+              <rect x="68" y="56" width="4" height="4" fill="#000" />
+              <rect x="32" y="62" width="4" height="4" fill="#000" />
+              <rect x="44" y="62" width="4" height="4" fill="#000" />
+              <rect x="62" y="62" width="4" height="4" fill="#000" />
+              <rect x="68" y="68" width="4" height="4" fill="#000" />
+            </svg>
+          </div>
+          <div
+            style="font-size: 10.5px; font-weight: bold; letter-spacing: 1px"
+          >
+            SCAN ME
+          </div>
+        </div>
+
+        <div class="b-watermark">
+          <div class="watermark-text">Internet<br />Copy</div>
+        </div>
+
+        <div class="b-controller">
+          Controller of Examinations<br />
+          Assam Higher Secondary Education Council<br />
+          Guwahati-21
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend-wrap">
+        <div class="legend-inner">
+          <div class="legend-left">
+            <table class="ltable">
+              <tr>
+                <td></td>
+                <td class="lhdr">THEORY</td>
+                <td class="lhdr">PRACTICAL</td>
+              </tr>
+              <tr>
+                <td>FULL MARKS :</td>
+                <td style="text-align: center">100/80/70</td>
+                <td style="text-align: center">20/30</td>
+              </tr>
+              <tr>
+                <td>PASS MARKS :</td>
+                <td style="text-align: center">30/24/21</td>
+                <td style="text-align: center">08/12</td>
+              </tr>
+            </table>
+          </div>
+          <div class="legend-right"></div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        This marks sheet is not to be treated as original. It is meant for
+        immediate information to the examinee. Original marks sheet have been
+        issued by the Council separately.
+      </div>
     </div>
-
-    <script>
-      let currentResult = null;
-      async function fetchResult() {
-        const roll = document.getElementById("roll").value.trim();
-        const no = document.getElementById("no").value.trim();
-        if (!roll || !no) return alert("Enter Roll and No");
-
-        document.getElementById("resultArea").classList.add("hidden");
-        document.getElementById("error").classList.add("hidden");
-        document.getElementById("loader").classList.remove("hidden");
-
-        try {
-          // Hardcoded URL to prevent construction errors
-          const url = "https://hlrcfmiwizggb6mq7jcsezvi5u0wgdpb.lambda-url.ap-south-1.on.aws/?rollNumber=" + roll + "-" + no;
-          console.log("Fetching:", url);
-          
-          const response = await fetch(url);
-          if (!response.ok) throw new Error("Not found");
-
-          currentResult = await response.json();
-          document.getElementById("studentName").innerText = currentResult.CandidateName;
-          
-          let html = '<table class="w-full text-sm border"><tr><th class="border p-1">Subject</th><th class="border p-1">Marks</th></tr>';
-          for (let i = 1; i <= 16; i++) {
-            if (currentResult["Sub" + i + "_Name"]) {
-              html += '<tr><td class="border p-1">' + currentResult["Sub" + i + "_Name"] + '</td><td class="border p-1">' + currentResult["Sub" + i + "_Tot_Marks"] + '</td></tr>';
-            }
-          }
-          document.getElementById("marksTable").innerHTML = html + '</table>';
-          document.getElementById("resultArea").classList.remove("hidden");
-        } catch (err) {
-          console.error(err);
-          document.getElementById("error").classList.remove("hidden");
-        } finally {
-          document.getElementById("loader").classList.add("hidden");
-        }
-      }
-
-      function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text("Result: " + currentResult.CandidateName, 20, 20);
-        doc.save("Result.pdf");
-      }
-    </script>
   </body>
 </html>
